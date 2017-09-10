@@ -365,6 +365,10 @@ local function caddr(obj)
    return car(cdr(cdr(obj)))
 end
 
+local function cdddr(obj)
+	return cdr(cdr(cdr(obj)))
+end
+
 local function cadddr(obj)
    return car(cdr(cdr(cdr(obj))))
 end
@@ -627,6 +631,14 @@ local function read(port)
    return inner_read()
 end
 
+local function string2l_string(exp)
+	if is_string(exp) then
+		return table.concat(exp, "", 2)
+	else
+		error("Not a string")
+	end
+end
+
 local function write(exp, port)
 
    local port = port or io.output()
@@ -700,14 +712,6 @@ local function newline(port)
    port:write("\r\n")
 
    return undef_obj
-end
-
-local function string2l_string(exp)
-	if is_string(exp) then
-		return table.concat(exp, "", 2)
-	else
-		error("Not a string")
-	end
 end
 
 local function table2list(t)
@@ -989,7 +993,7 @@ local function eval(exp, env)
 	 elseif op == "define" then
 	    local var = cadr(exp)
             local docstring = caddr(exp)
-            if is_string(docstring) then
+            if is_string(docstring) and (not is_nil(cdddr(exp))) then
                exp = cdr(exp)
             else
                docstring = nodoc
@@ -1019,7 +1023,9 @@ local function eval(exp, env)
 		  error("Assignment to non-symbol!")
 	       end
 	       return evaluate(caddr(exp), env, function(v)
-               v["doc"] = docstring
+	           if type(v) == "table" then
+                 v["doc"] = docstring
+               end
                env[var] = v
                return cont(undef_obj)
                end)
