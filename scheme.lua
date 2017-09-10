@@ -14,6 +14,8 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+local exports = {}
+
 local function l_eval(exp)
 	return assert(loadstring("return (" .. exp .. ")"))()
 end
@@ -36,8 +38,6 @@ local l_loadstring = loadstring
 local l_assert = assert
 local l_type = type
 local l_ipairs = ipairs
-
-module("scheme")
 
 -- the global environment
 local global_env = {}
@@ -744,6 +744,8 @@ local function list2table(v)
 	return xs
 end
 
+local s2lv = nil
+
 local function l2sv(v, s)
 	local t = l_type(v)
 	if t == "number" then
@@ -824,7 +826,7 @@ local function list2l(rv)
 	return r
 end
 
-local function s2lv(v)
+s2lv = function(v)
 	if is_primitive(v) then
 		return primitive_function(v)
 	elseif v == bool_true then
@@ -1140,7 +1142,7 @@ add_primitive("apply-lua", apply_lua, -1)
 --
 
 -- loads files
-function load(fname)
+function exports.load(fname)
    local status, exp
 
    if (not fname) or fname == "" then
@@ -1149,7 +1151,7 @@ function load(fname)
 
    local port, err = l_io_open(fname, "rb")
    if not port then
-      l_io_write("Error opening Scheme file: " .. err)
+      l_io_write("Error opening Scheme file: " .. err .. "\r\n")
       return
    end
 
@@ -1182,7 +1184,7 @@ function load(fname)
 end
 
 -- the REPL
-function repl()
+function exports.repl()
    local function toplevel()
       local status, exp
       l_io_write("scheme> ")
@@ -1210,3 +1212,5 @@ function repl()
    end
    return toplevel()
 end
+
+return exports
