@@ -813,6 +813,8 @@ local function list2l(rv)
 	return r
 end
 
+local eval = nil
+
 s2lv = function(v)
 	if is_primitive(v) then
 		return primitive_function(v)
@@ -856,7 +858,7 @@ local function eval_lua(exp)
 	return l2sv(l_eval(string2l_string(exp)))
 end
 
-local function eval(exp, env)
+eval = function(exp, env)
 
    local env = env or global_env
 
