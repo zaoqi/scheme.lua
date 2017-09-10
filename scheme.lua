@@ -88,6 +88,8 @@ local function make_string(str)
    return strobj
 end
 
+local nodoc = make_string("No documentation available.")
+
 local function make_char(c)
    return {[1] = "char", [2] = c}
 end
@@ -990,16 +992,18 @@ local function eval(exp, env)
             if is_string(docstring) then
                exp = cdr(exp)
             else
-               docstring = make_string("No documentation available.")
+               docstring = nodoc
             end
 	    if is_pair(var) then
 	       local fname = car(var)
-               local docstring = cadr(var)
                local args = cdr(var)
-               if is_string (docstring) then
-                 args = cddr(var)
-               else
-                 docstring = make_string("No documentation available.")
+               local docstring = nodoc
+               if not is_nil(args) then
+                 local mdoc = cadr(var)
+                 if is_string(mdoc) then
+                   docstring = mdoc
+                   args = cddr(var)
+                 end
                end
 	       local body = cddr(exp)
 	       local proc = make_procedure(args, env, body)
